@@ -38,6 +38,8 @@ public class Autotagging
 	public static ArrayList<String> directionsList = new ArrayList<String>();
 	public static String TAG_TYPE_LANDMARK = "landmark";
 	public static String TAG_TYPE_DIRECTIONS = "directions";
+	public static Trie landmarksTree = null;
+	public static Trie directionsTree = null;
 	
 	public static void main(String args[])  
 	{
@@ -51,8 +53,17 @@ public class Autotagging
 								  " Pass Taco Time on your left, and look for a small opening on your lift. This" +
 								  " opening will have a cashier counter on your right. Turn left and enter the world" +
 								  "of the Hub. You will find a wide variety of food stations around a semicircle.";
+		
+//		String routeDescription ="On your left you will pass the ATM machines which make distinctive sounds, and the campus post office and mailbox. " ;
+		landmarksTree = new Trie();
+		directionsTree = new Trie();
+		// This is used to load the landmarks that are stored in the XML file.
 		loadLandMarks();
+		
+		// The given input string is divided in to array of sentenses.
 		String[] routeDescSentenses= sentenseDetection(routeDescription);
+		
+		//Each sentense is sent to string tokeniser in order to split into tokens.
 		for(String s: routeDescSentenses)
 		{	
 				stringTokeniser(s);
@@ -201,12 +212,46 @@ public class Autotagging
 		  
 		  
 		  String tags[] = tagger.tag(tokens);
-		  
+		  String word = "";
+		  ArrayList<String> landmarks = new ArrayList<String>();
 		  for(int i=0;i<tags.length;i++)
 		  {
+			  
 			  if(nounsList.contains((tags[i]).toUpperCase())) 
 			  {
-				  System.out.println(tokens[i] +"--->"+tags[i]);
+				  word += tokens[i];
+				 if( landmarksTree.search(word.toLowerCase()))
+				 {
+					 System.out.println(word);
+					 word = "";
+					 
+				 }   
+				 else
+				{
+					 landmarks =  landmarksTree.getWordsMatchingPrefix(word, landmarksTree);
+					 
+					   if(landmarks.size() > 0)
+					   {
+						   if(landmarks.contains(word.toLowerCase()))
+						   {
+							   System.out.println(word);
+							   word = "";
+						   }
+						   else
+						   {
+//							   System.out.println(word);
+							   word += " ";
+						   }
+					   }
+					   else
+					   {
+//						   System.out.println(word);
+						   word = "";
+					   }
+					 
+					 
+				 }
+
 			  
 			  }
 		  }
@@ -320,12 +365,17 @@ public class Autotagging
 			if(tagType.equalsIgnoreCase(TAG_TYPE_LANDMARK))
 			{	
 				String landmark = eElement.getElementsByTagName(sTag).item(i).getChildNodes().item(0).getNodeValue();
+				
 				landmarksList.add(landmark);
+				
+				landmarksTree.insert(landmark.toUpperCase());
 			}
 			else if(tagType.equalsIgnoreCase(TAG_TYPE_DIRECTIONS))
 			{	
 				String directions = eElement.getElementsByTagName(sTag).item(i).getChildNodes().item(0).getNodeValue();
 					directionsList.add(directions);
+					
+					directionsTree.insert(directions.toUpperCase());
 			}
 		}
 	    }
