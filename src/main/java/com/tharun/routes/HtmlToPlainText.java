@@ -1,15 +1,19 @@
 package com.tharun.routes;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
-import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
-
-import java.io.IOException;
 
 /**
  * HTML to plain-text. This example program demonstrates the use of jsoup to convert HTML input to lightly-formatted
@@ -41,13 +45,25 @@ public class HtmlToPlainText {
         System.out.println(endIndex);
        
         String output = plainText.substring(requiredStartText, endIndex);
-        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
-        System.out.println(noHTMLString);
+        System.out.println(Arrays.toString(getTagValues(output).toArray()));
+//        System.out.println(output);
+//        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
+//        System.out.println(noHTMLString);
         
         
 //        System.out.println(plainText);
     }
+    private static final Pattern TAG_REGEX = Pattern.compile("<http://.*/(.+?)>");
 
+
+    private static List<String> getTagValues(final String str) {
+        final List<String> tagValues = new ArrayList<String>();
+        final Matcher matcher = TAG_REGEX.matcher(str);
+        while (matcher.find()) {
+            tagValues.add(matcher.group(1));
+        }
+        return tagValues;
+    }
     /**
      * Format an Element to plain-text
      * @param element the root element to format
