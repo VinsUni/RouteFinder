@@ -1,4 +1,6 @@
 package com.tharun.routes;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +26,16 @@ import org.jsoup.select.NodeVisitor;
  *
  * 
  */
-public class HtmlToPlainText {
+public class HtmlToPlainText 
+{
     public static void main(String... args) throws IOException {
 //        Validate.isTrue(args.length == 1, "usage: supply url to fetch");
 //        String url = args[0];
-    	String url = "http://en.wikipedia.org/wiki/Utah_State_Route_201";
 
+    	String url = "http://en.wikipedia.org/wiki/Utah_State_Route_201";
+    	String ROUTEDESCRIPTIONS_PATH = "RouteDescriptions/";
+    	String ROUTELANDMARKS_PATH = "RouteLandmarks/";
+    	
         // fetch the specified URL and parse to a HTML DOM
         Document doc = Jsoup.connect(url).get();
 
@@ -46,14 +52,28 @@ public class HtmlToPlainText {
        
         String output = plainText.substring(requiredStartText, endIndex);
         System.out.println(Arrays.toString(getTagValues(output).toArray()));
-//        System.out.println(output);
-//        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
-//        System.out.println(noHTMLString);
-        
+        System.out.println(output);
+        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
+        System.out.println(noHTMLString);
+        writeToFile(ROUTEDESCRIPTIONS_PATH,"Test.txt",noHTMLString);
         
 //        System.out.println(plainText);
     }
-    private static final Pattern TAG_REGEX = Pattern.compile("<http://.*/(.+?)>");
+    private static void writeToFile(String path,
+			String fileName, String noHTMLString) {
+    	try{
+  		  // Create file 
+  		  FileWriter fstream = new FileWriter(path+fileName);
+  		  BufferedWriter out = new BufferedWriter(fstream);
+  		  out.write(noHTMLString);
+  		  //Close the output stream
+  		  out.close();
+  		  }catch (Exception e){//Catch exception if any
+  		  System.err.println("Error: " + e.getMessage());
+  		  }
+		
+	}
+	private static final Pattern TAG_REGEX = Pattern.compile("<http://.*/(.+?)>");
 
 
     private static List<String> getTagValues(final String str) {
@@ -135,5 +155,7 @@ public class HtmlToPlainText {
         public String toString() {
             return accum.toString();
         }
+        
+        
     }
 }
