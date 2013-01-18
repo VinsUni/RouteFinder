@@ -32,47 +32,49 @@ public class HtmlToPlainText
 //        Validate.isTrue(args.length == 1, "usage: supply url to fetch");
 //        String url = args[0];
 
-    	String url = "http://en.wikipedia.org/wiki/Utah_State_Route_201";
-    	String ROUTEDESCRIPTIONS_PATH = "RouteDescriptions/";
+    		String ROUTEDESCRIPTIONS_PATH = "RouteDescriptions/";
     	String ROUTELANDMARKS_PATH = "RouteLandmarks/";
-    	
-        // fetch the specified URL and parse to a HTML DOM
-        Document doc = Jsoup.connect(url).get();
-
-        HtmlToPlainText formatter = new HtmlToPlainText();
-        String plainText = formatter.getPlainText(doc);
-        String ROUTE_DESCRIPTION = "Route description";
-        String HISTORY = "History";
-        int firstIndex = plainText.indexOf(ROUTE_DESCRIPTION);
-        int requiredStartText = plainText.indexOf(ROUTE_DESCRIPTION, ++firstIndex);
-        System.out.println(requiredStartText);
-        
-        int endIndex = plainText.indexOf(HISTORY, requiredStartText);
-        System.out.println(endIndex);
-       
-        String output = plainText.substring(requiredStartText, endIndex);
-        System.out.println(Arrays.toString(getTagValues(output).toArray()));
-        System.out.println(output);
-        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
-        System.out.println(noHTMLString);
-        writeToFile(ROUTEDESCRIPTIONS_PATH,"Test.txt",noHTMLString);
+    	  WriteXMLFile writeXmlfileObj = new WriteXMLFile();
+    	  
+    	  int listofRoutes[] = {11,13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,
+    			  38,39,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,60,62,63,64,65,66,67,68,
+    			  69,71,72,73,74,75,76,77,78,79,82,83,87,88,90,92,93,94,95,96,97,99,100,101,102,103,104,105,
+    			  106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,
+    			  128,130,131,132,133,134,136,137,138,139,140,142,143,144,145,146,147,148,149,150,151,152,
+    			  153,154,155,156,157,158,159,160,161,162,167,164,165,168,171,172,173,174,175,178,180,181,
+    			  192,193,196,197,198,199,201,202,203,204,208,209,210,211,212,217,218,219,222,224,225};
+    	  for(int i : listofRoutes)
+    	  {
+    		  String url = "http://en.wikipedia.org/wiki/" ;
+    		  String endString ="Utah_State_Route_";
+    		    
+    		  // fetch the specified URL and parse to a HTML DOM
+		        Document doc = Jsoup.connect(url+endString+i).get();
+		
+		        HtmlToPlainText formatter = new HtmlToPlainText();
+		        String plainText = formatter.getPlainText(doc);
+		        String ROUTE_DESCRIPTION = "Route description";
+		        String HISTORY = "History";
+		        int firstIndex = plainText.indexOf(ROUTE_DESCRIPTION);
+		        int requiredStartText = plainText.indexOf(ROUTE_DESCRIPTION, ++firstIndex);
+		        System.out.println(requiredStartText);
+		        
+		        int endIndex = plainText.indexOf(HISTORY, requiredStartText);
+		        System.out.println(endIndex);
+		       
+		        String output = plainText.substring(requiredStartText, endIndex);
+		      
+		        writeXmlfileObj.writeToXmlFile(ROUTELANDMARKS_PATH,endString+i+".xml", getTagValues(output));
+//		        System.out.println(Arrays.toString(getTagValues(output).toArray()));
+//		        System.out.println(output);
+		        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
+//		        System.out.println(noHTMLString);
+		        writeXmlfileObj.writeToFile(ROUTEDESCRIPTIONS_PATH,endString+i+".txt",noHTMLString);
         
 //        System.out.println(plainText);
     }
-    private static void writeToFile(String path,
-			String fileName, String noHTMLString) {
-    	try{
-  		  // Create file 
-  		  FileWriter fstream = new FileWriter(path+fileName);
-  		  BufferedWriter out = new BufferedWriter(fstream);
-  		  out.write(noHTMLString);
-  		  //Close the output stream
-  		  out.close();
-  		  }catch (Exception e){//Catch exception if any
-  		  System.err.println("Error: " + e.getMessage());
-  		  }
-		
-	}
+    }
+   
 	private static final Pattern TAG_REGEX = Pattern.compile("<http://.*/(.+?)>");
 
 
