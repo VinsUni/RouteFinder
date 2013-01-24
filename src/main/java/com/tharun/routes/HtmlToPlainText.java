@@ -36,7 +36,8 @@ public class HtmlToPlainText
     	String ROUTELANDMARKS_PATH = "RouteLandmarks/";
     	  WriteXMLFile writeXmlfileObj = new WriteXMLFile();
     	  
-    	  int listofRoutes[] = {11,13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,
+    	  int listofRoutes[] = {11,
+    			  13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,
     			  38,39,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,60,62,63,64,65,66,67,68,
     			  69,71,72,73,74,75,76,77,78,79,82,83,87,88,90,92,93,94,95,96,97,99,100,101,102,103,104,105,
     			  106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,
@@ -67,7 +68,7 @@ public class HtmlToPlainText
 		        writeXmlfileObj.writeToXmlFile(ROUTELANDMARKS_PATH,endString+i+".xml", getTagValues(output));
 //		        System.out.println(Arrays.toString(getTagValues(output).toArray()));
 //		        System.out.println(output);
-		        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "");
+		        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "").replaceAll("\\[edit ","").replaceAll("\\]", "");
 //		        System.out.println(noHTMLString);
 		        writeXmlfileObj.writeToFile(ROUTEDESCRIPTIONS_PATH,endString+i+".txt",noHTMLString);
         
@@ -82,8 +83,10 @@ public class HtmlToPlainText
         final List<String> tagValues = new ArrayList<String>();
         final Matcher matcher = TAG_REGEX.matcher(str);
         while (matcher.find()) {
+        	if (!matcher.group(1).startsWith("File:"))
             tagValues.add(matcher.group(1));
         }
+        tagValues.remove(tagValues.size()-1);
         return tagValues;
     }
     /**
