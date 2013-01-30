@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jan 29, 2013 3:58:45 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="com.tharun.routes.RouteDescriptions" table="route_descriptions" catalog="">
+        <id name="routeIdUrl" type="string">
+            <column name="ROUTE_ID_URL" length="10" />
+            <generator class="assigned" />
+        </id>
+        <property name="routeDescription" type="string">
+            <column name="ROUTE_DESCRIPTION" length="65535" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>

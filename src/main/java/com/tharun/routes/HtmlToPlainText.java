@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,15 +29,18 @@ import org.jsoup.select.NodeVisitor;
  */
 public class HtmlToPlainText 
 {
-    public static void main(String... args) throws IOException {
+//    public static void main(String... args) throws IOException {
 //        Validate.isTrue(args.length == 1, "usage: supply url to fetch");
 //        String url = args[0];
+	
+	HashMap<String,String> routesData = new HashMap<String, String>(); 
 
+	public HashMap<String, String> getPlainTextData(){
     		String ROUTEDESCRIPTIONS_PATH = "RouteDescriptions/";
     	String ROUTELANDMARKS_PATH = "RouteLandmarks/";
     	  WriteXMLFile writeXmlfileObj = new WriteXMLFile();
     	  
-    	  int listofRoutes[] = {11,
+    	  int listofRoutes[] = {11, 
     			  13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,
     			  38,39,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,60,62,63,64,65,66,67,68,
     			  69,71,72,73,74,75,76,77,78,79,82,83,87,88,90,92,93,94,95,96,97,99,100,101,102,103,104,105,
@@ -50,7 +54,13 @@ public class HtmlToPlainText
     		  String endString ="Utah_State_Route_";
     		    
     		  // fetch the specified URL and parse to a HTML DOM
-		        Document doc = Jsoup.connect(url+endString+i).get();
+		        Document doc = null;
+				try {
+					doc = Jsoup.connect(url+endString+i).get();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		
 		        HtmlToPlainText formatter = new HtmlToPlainText();
 		        String plainText = formatter.getPlainText(doc);
@@ -70,10 +80,13 @@ public class HtmlToPlainText
 //		        System.out.println(output);
 		        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "").replaceAll("\\[edit ","").replaceAll("\\]", "");
 //		        System.out.println(noHTMLString);
-		        writeXmlfileObj.writeToFile(ROUTEDESCRIPTIONS_PATH,endString+i+".txt",noHTMLString);
+//		        writeXmlfileObj.writeToFile(ROUTEDESCRIPTIONS_PATH,endString+i+".txt",noHTMLString);
         
 //        System.out.println(plainText);
+		        routesData.put(url+endString+i, noHTMLString);
+//		        return noHTMLString;
     }
+		return routesData;
     }
    
 	private static final Pattern TAG_REGEX = Pattern.compile("<http://.*/(.+?)>");
