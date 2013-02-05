@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 4, 2013 5:14:58 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="com.tharun.routes.RouteSentenses" table="route_sentenses" catalog="">
+        <id name="sentenseId" type="java.lang.Integer">
+            <column name="SENTENSE_ID" />
+            <generator class="identity" />
+        </id>
+        <property name="sentenses" type="string">
+            <column name="SENTENSES" length="65535" not-null="true" />
+        </property>
+        <property name="routeIdUrl" type="string">
+            <column name="ROUTE_ID_URL" length="100" not-null="true" />
+        </property>
+        <property name="routeDescriptionPosition" type="java.lang.Integer">
+            <column name="ROUTE_DESCRIPTION_POSITION" />
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 4, 2013 6:19:40 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="com.tharun.routes.RouteLandmarks" table="route_landmarks" catalog="">
+        <id name="id" type="java.lang.Integer">
+            <column name="ID" />
+            <generator class="identity" />
+        </id>
+        <property name="landmark" type="string">
+            <column name="LANDMARK" length="65535" not-null="true" />
+        </property>
+        <property name="sentenseIds" type="string">
+            <column name="SENTENSE_IDS" length="65535" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>

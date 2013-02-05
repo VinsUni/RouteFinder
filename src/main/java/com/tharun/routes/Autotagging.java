@@ -117,7 +117,7 @@ public class Autotagging
 		}
 	}
 	
-	private static String[] sentenseDetection(String description)
+	public static String[] sentenseDetection(String description)
 	{
 		InputStream modelIn = null;
 	    SentenceModel model =null;
