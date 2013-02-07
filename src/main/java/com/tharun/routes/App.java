@@ -18,19 +18,21 @@ public class App {
 	public static void main(String[] args) {
 
 		// Step 1: Go to the URLs and fetch the content.
-	   //				insertUrlDescriptions();
+//	   				insertUrlDescriptions();
 
 		
 			//Step 2: Now fetch all the URLs
-			List list = getAllRouteDescRecords();
+//			List list = getAllRouteDescRecords();
 			
 			//Step 3: Now send this to sentense Splitter .
-			insertIntoSentensesTable(list);
+//			insertIntoSentensesTable(list);
 			
 			
 			
 			//Step 4: Now find the landmarks
-			
+			// Get Each sentense and then send it to the Autotagging functionality.
+		List sentensesList = getAllRouteSentenses();
+		Autotagging.extractLandMarks(sentensesList);
 	
 	}
 	private static void insertIntoSentensesTable(List list)
@@ -91,15 +93,17 @@ public class App {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Query query = session.createQuery("from RouteDescriptions");
 		List list = query.list();
-//		System.out.println(list.size());
-//		for(int i=0; i < 2; i++)
-//		{
-//			RouteDescriptions rd = (RouteDescriptions) list.get(i);
-//			System.out.println(rd.getRouteIdUrl());
-//		}
 		return list;
 	}
 	
+	public static List getAllRouteSentenses()
+	{
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Query query = session.createQuery("from RouteSentenses");
+		List list = query.list();
+			System.out.println(list.size());
+		return list;
+	}
 	
 	
 	

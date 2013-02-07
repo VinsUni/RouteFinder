@@ -1,1 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><NamedEntities><Entity type="landmark"><Name>SR-99_(UT)</Name><Name>Fillmore,_Utah</Name><Name>I-15_(UT)</Name><Name>US-50_(UT)</Name><Name>Utah_State_Route_100#cite_note-reference-2</Name><Name>Utah_State_Route_100#cite_note-Google_Maps-3</Name></Entity></NamedEntities>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<NamedEntities>
+	<Entity type="landmark">
+		<Name>SR-99</Name>
+		<Name>Fillmore</Name>
+		<Name>I-15</Name>
+		<Name>US-50</Name>
+		<Name>Utah State Route 100#cite note-reference-2</Name>
+		<Name>Utah State Route 100#cite note-Google Maps-3</Name>
+	</Entity>
+</NamedEntities>

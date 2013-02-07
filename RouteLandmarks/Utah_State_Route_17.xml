@@ -1,11 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<NamedEntities>
-	<Entity type="landmark">
-		<Name>La_Verkin,_Utah</Name>
-		<Name>Toquerville,_Utah</Name>
-		<Name>I-15_(UT)</Name>
-		<Name>Anderson_Junction,_Utah</Name>
-		<Name>Diamond_interchange</Name>
-		<Name>Utah_State_Route_17#cite_note-gmaps-3</Name>
-	</Entity>
-</NamedEntities>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><NamedEntities><Entity type="landmark"><Name>La Verkin</Name><Name>Toquerville</Name><Name>I-15</Name><Name>Anderson Junction</Name><Name>Diamond interchange</Name><Name>Utah State Route 17#cite note-gmaps-3</Name></Entity></NamedEntities>

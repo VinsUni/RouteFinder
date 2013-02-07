@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +33,7 @@ import org.w3c.dom.NodeList;
 public class Autotagging
 {
 	public static String PATH= "Files/";
+	public static String LANDMARKS_PATH = "RouteLandmarks/";
 //	public static String PATH= "/home/tharun/NLP/";
 	
 	public static ArrayList<String> landmarksList = new ArrayList<String>();
@@ -58,7 +60,7 @@ public class Autotagging
 		landmarksTree = new Trie();
 		directionsTree = new Trie();
 		// This is used to load the landmarks that are stored in the XML file.
-		loadLandMarks();
+		loadLandMarks("");
 		
 		// The given input string is divided in to array of sentenses.
 		String[] routeDescSentenses= sentenseDetection(routeDescription);
@@ -70,6 +72,20 @@ public class Autotagging
 				System.out.println("__________________________________________________________________");
 		}
 		
+	}
+	public static void extractLandMarks(List list)
+	{
+		for(int i=0; i< 10;i++)
+		{
+			landmarksTree = new Trie();
+			directionsTree = new Trie();
+			RouteSentenses routeSentenses= (RouteSentenses) list.get(i);
+			loadLandMarks(routeSentenses.getRouteIdUrl().substring(routeSentenses.getRouteIdUrl().lastIndexOf("/")+1));
+//			System.out.println(routeSentenses.getSentenses());
+			stringTokeniser(routeSentenses.getSentenses());
+			System.out.println("__________________________________________________________________");
+			
+		}
 	}
 	
 	public static void namedEntityRecongition(String[] tokens) throws FileNotFoundException
@@ -97,7 +113,8 @@ public class Autotagging
 				Span nameSpans[] = nameFinder.find(tokens);
 				for(Span s : nameSpans)
 				{
-					System.out.println("Found entity: " + Arrays.toString(Span.spansToStrings(nameSpans, tokens)));
+					String entity = Arrays.toString(Span.spansToStrings(nameSpans, tokens));
+					System.out.println("Found entity: " +entity.substring(1,entity.length()-1));
 //					System.out.println(s);
 				}
 				
@@ -305,14 +322,16 @@ public class Autotagging
 //		  
 		  
 	
-	private static void loadLandMarks()
+	private static void loadLandMarks(String fileName)
 	{
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
 		try 
 		{
 			 builder = builderFactory.newDocumentBuilder();
-			 Document document  = builder.parse(PATH+"Autotagging.xml");
+//			 Document document  = builder.parse(PATH+"Autotagging.xml");
+			 Document document  = builder.parse(LANDMARKS_PATH+fileName+".xml");
+			 System.out.println(LANDMARKS_PATH+fileName+".xml");
 			 Element rootElement = document.getDocumentElement();
 		 	
 		 	System.out.println("Root Element :" + document.getDocumentElement().getNodeName());
@@ -326,7 +345,7 @@ public class Autotagging
 				   for (int a = 0; a < attributes.getLength(); a++) 
 				   {
 				           Node theAttribute = attributes.item(a);
-//				           System.out.println(theAttribute.getNodeName() + "=" + theAttribute.getNodeValue());
+				           System.out.println(theAttribute.getNodeName() + "=" + theAttribute.getNodeValue());
 				           if(theAttribute.getNodeValue().equalsIgnoreCase(TAG_TYPE_LANDMARK))
 				           {
 				        	   Element eElement = (Element) node;

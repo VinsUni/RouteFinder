@@ -73,9 +73,10 @@ public class HtmlToPlainText
 		        int endIndex = plainText.indexOf(HISTORY, requiredStartText);
 		        System.out.println(endIndex);
 		       
-		        String output = plainText.substring(requiredStartText, endIndex);
+		       if(requiredStartText != -1 && endIndex !=-1)
+		       {   String output = plainText.substring(requiredStartText, endIndex);
 		      
-		        writeXmlfileObj.writeToXmlFile(ROUTELANDMARKS_PATH,endString+i+".xml", getTagValues(output));
+		        writeXmlfileObj.writeToXmlFile(ROUTELANDMARKS_PATH,endString+i+".xml", getTagValues(output.replace("_(UT)","").replace(",_Utah","").replace(".", "").replace("_"," ")));
 //		        System.out.println(Arrays.toString(getTagValues(output).toArray()));
 //		        System.out.println(output);
 		        String noHTMLString = output.replaceAll("\\<.*?\\>", "").replaceAll("\\[.*?\\]", "").replaceAll("\\[edit ","").replaceAll("\\]", "");
@@ -85,6 +86,7 @@ public class HtmlToPlainText
 //        System.out.println(plainText);
 		        routesData.put(url+endString+i, noHTMLString);
 //		        return noHTMLString;
+		       }
     }
 		return routesData;
     }
@@ -125,7 +127,7 @@ public class HtmlToPlainText
         public void head(Node node, int depth) {
             String name = node.nodeName();
             if (node instanceof TextNode)
-                append(((TextNode) node).text()); // TextNodes carry all user-readable text in the DOM.
+                append(" "+((TextNode) node).text()); // TextNodes carry all user-readable text in the DOM.
             else if (name.equals("li"))
                 append("\n * ");
         }
