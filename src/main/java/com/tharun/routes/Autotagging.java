@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,11 +26,15 @@ import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.tharun.persistence.HibernateUtil;
 public class Autotagging
 {
 	public static String PATH= "Files/";
@@ -43,80 +48,42 @@ public class Autotagging
 	public static Trie landmarksTree = null;
 	public static Trie directionsTree = null;
 	
-	public static void main(String args[])  
-	{
-		
-		String routeDescription = "You are standing with your back to the south entrance to the Quick Stop. Turn left so you are walking east." +
-								  "On your left you will pass the ATM machines which make distinctive sounds, and the campus post office and mailbox. " +
-								  " You will pass the entrance to the financial aid office on your right and several bulletin boards." +
-								  " Continue walking east and passing offices, the barber shop, and the copy center" +
-								  " as you walk down this long hall. Towards the eastern end of the building, you" +
-								  " will come to a wide open area on your left. Turn left and walk a little north." +
-								  " Pass Taco Time on your left, and look for a small opening on your lift. This" +
-								  " opening will have a cashier counter on your right. Turn left and enter the world" +
-								  "of the Hub. You will find a wide variety of food stations around a semicircle.";
-		
-//		String routeDescription ="On your left you will pass the ATM machines which make distinctive sounds, and the campus post office and mailbox. " ;
-		landmarksTree = new Trie();
-		directionsTree = new Trie();
-		// This is used to load the landmarks that are stored in the XML file.
-		loadLandMarks("");
-		
-		// The given input string is divided in to array of sentenses.
-		String[] routeDescSentenses= sentenseDetection(routeDescription);
-		
-		//Each sentense is sent to string tokeniser in order to split into tokens.
-		for(String s: routeDescSentenses)
-		{	
-				stringTokeniser(s);
-				System.out.println("__________________________________________________________________");
-		}
-		
-	}
+//	 Method is used to extract the landmarks from sentenses.
 	public static void extractLandMarks(List list)
 	{
-		for(int i=0; i< 10;i++)
+		for(int i=20; i< list.size();i++)
 		{
 			landmarksTree = new Trie();
 			directionsTree = new Trie();
 			RouteSentenses routeSentenses= (RouteSentenses) list.get(i);
 			loadLandMarks(routeSentenses.getRouteIdUrl().substring(routeSentenses.getRouteIdUrl().lastIndexOf("/")+1));
-//			System.out.println(routeSentenses.getSentenses());
-			stringTokeniser(routeSentenses.getSentenses());
+			System.out.println(routeSentenses.getSentenses());
+			
+			stringTokeniser(routeSentenses.getSentenses(),routeSentenses.getSentenseId());
 			System.out.println("__________________________________________________________________");
 			
 		}
 	}
 	
-	public static void namedEntityRecongition(String[] tokens) throws FileNotFoundException
+	public static void namedEntityRecongition(String[] tokens, Integer routeSentenseId) throws FileNotFoundException
 	{
 		InputStream modelIn = new FileInputStream(PATH+"en-ner-location.bin");
-//		InputStream modelIn = new FileInputStream("C:/Users/tharun/Dropbox/NLP");
-		try {
+ 		try {
 		  TokenNameFinderModel model = new TokenNameFinderModel(modelIn);
 		  NameFinderME nameFinder = new NameFinderME(model);
 		  System.out.println("Entered");
-		  String sentence[] = new String[]{
-				    "Donald",
-				    "Daniel",
-				    "is",
-				    "61",
-				    "years",
-				    "old",
-				    ".",
-				    "lives",
-				    "in",
-				    "san jose",
-				    "jose"
-				    };
-
-				Span nameSpans[] = nameFinder.find(tokens);
-				for(Span s : nameSpans)
+		  				Span nameSpans[] = nameFinder.find(tokens);
+		  				String entity = "";
+		  		for(Span s : nameSpans)
 				{
-					String entity = Arrays.toString(Span.spansToStrings(nameSpans, tokens));
+					 entity = Arrays.toString(Span.spansToStrings(nameSpans, tokens));
 					System.out.println("Found entity: " +entity.substring(1,entity.length()-1));
+					System.out.println("Route Id "+ routeSentenseId);
+				
 //					System.out.println(s);
 				}
+		 if(!entity.equals("") && entity != null)
+			 writeLandmarksToDb(entity.substring(1,entity.length()-1).split(","),routeSentenseId);
 				
 						nameFinder.clearAdaptiveData();
 		}
@@ -157,22 +124,16 @@ public class Autotagging
 		    }
 		  }
 		}
-		//Sentence Detection API
-//		System.out.println("Sentence Detection API\n"+"\n");
 		SentenceDetectorME sentenceDetector = new SentenceDetectorME(model);
 		String sentences[] = sentenceDetector.sentDetect(description);
 		
-//		for(String s : sentences)
-//		{
-//			System.out.println(s);
-//		}
-		
+
 		return sentences;
 		
 	}
 	
 	
-	private static void stringTokeniser(String sentence)
+	private static void stringTokeniser(String sentence, Integer routeSentenseId)
 	{
 		InputStream modelIn = null;
 		 TokenizerModel tModel = null;
@@ -185,8 +146,8 @@ public class Autotagging
 		    Tokenizer tokenizer = new TokenizerME(tModel);
 			
 			String tokens[] = tokenizer.tokenize(sentence);
-			namedEntityRecongition(tokens);
-			partsOfSpeechTagger(tokens);
+			namedEntityRecongition(tokens,routeSentenseId);
+			partsOfSpeechTagger(tokens,routeSentenseId);
 //			for(String s : tokens)
 //			{
 //				System.out.println(s);
@@ -206,7 +167,7 @@ public class Autotagging
 		}
 	}
 	
-	private static void partsOfSpeechTagger( String[] tokens)
+	private static void partsOfSpeechTagger( String[] tokens, Integer routeSentenseId)
 	{
 		InputStream modelIn = null;
 		ArrayList<String> nounsList = new ArrayList<String>();
@@ -216,18 +177,12 @@ public class Autotagging
 		nounsList.add("NNPS");
 		
 		
-		try {
+		try 
+		{
 		  modelIn = new FileInputStream(PATH+"en-pos-maxent.bin");
 		  POSModel model = new POSModel(modelIn);
 		  
 		  POSTaggerME tagger = new POSTaggerME(model);
-		  
-//		  String sent[] = new String[]{"Most", "large", "cities", "in", "the", "San jose","old main hill" ,"Animal science","had",
-//                  "morning", "and", "afternoon", "newspapers", "."};
-//		  String sent[] = new String[] {"You", "are", "standing"," with", "your","back","to", "the"," south ","entrance",
-//				  "to", "the","Quick","Stop "};
-		  
-		  
 		  String tags[] = tagger.tag(tokens);
 		  String word = "";
 		  ArrayList<String> landmarks = new ArrayList<String>();
@@ -240,8 +195,10 @@ public class Autotagging
 				 if( landmarksTree.search(word.toLowerCase()))
 				 {
 					 System.out.println(word);
+					
+					 String[] words = new String[] {word};
+					 writeLandmarksToDb(words,routeSentenseId);
 					 word = "";
-					 
 				 }   
 				 else
 				{
@@ -252,6 +209,8 @@ public class Autotagging
 						   if(landmarks.contains(word.toLowerCase()))
 						   {
 							   System.out.println(word);
+							   String[] words = new String[] {word};
+								 writeLandmarksToDb(words,routeSentenseId);
 							   word = "";
 						   }
 						   else
@@ -289,37 +248,7 @@ public class Autotagging
 		}
 	}
 	
-//	private static void namedEntityTrainer() throws IOException
-//	{
-//		
-//		System.out.println("Entered namedEntityTrainer");
-//		FileReader fileReader = new FileReader("/home/tharun/NLP/train.txt");
-//		ObjectStream<String> fileStream = new PlainTextByLineStream(fileReader);
-//		ObjectStream<NameSample> sampleStream = new NameSampleDataStream(fileStream);
-//		TokenNameFinderModel model = NameFinderME.train("pt-br", "train", sampleStream, Collections.<String, Object>emptyMap());
-//		  NameFinderME nfm = new NameFinderME(model);
-//		  
-//		  String sentence[] = new String[]{
-//				    "Donald",
-//				    "Daniel",
-//				    "is",
-//				    "61m",
-//				    "50kg",
-//				    "old",
-//				    "."
-//				    };
-//		  
-//
-//				Span nameSpans[] = nfm.find(sentence);
-//				for(Span s : nameSpans)
-//				{
-//					System.out.println("Found namedEntityTrainer: " + Arrays.toString(Span.spansToStrings(nameSpans, sentence)));
-////					System.out.println(s);
-//				}
-//				
-//						nfm.clearAdaptiveData();
-//		}
-//		  
+
 		  
 	
 	private static void loadLandMarks(String fileName)
@@ -359,15 +288,7 @@ public class Autotagging
 				   }
 			  }
 			 
-//			 for(String s: landmarksList)
-//			 System.out.println(s);
-//			 
-//			 
-//			 System.out.println("____________________________________________");
-//			 
-//			 for(String s:directionsList)
-//				 System.out.println(s);
-			 
+	 
 		}catch(Exception e)
 		{
 			
@@ -398,6 +319,52 @@ public class Autotagging
 			}
 		}
 	    }
+	 
+	 private static void writeLandmarksToDb(String[] landmarks, Integer routeSentenseIds)
+	 {
+		 if(landmarks.length >0 && landmarks != null)
+		 {	 
+				 for(String currentLandmark :landmarks)
+				 {
+					 Session session = HibernateUtil.getSessionFactory().openSession();
+					 Query query = session.createQuery("from RouteLandmarks where landmark = :landmarkName ");
+					 query.setParameter("landmarkName", currentLandmark);
+					 List list = query.list();
+					 if(list.size() > 0)
+					 {
+						 // Update the particular record.
+						 
+						 for(int i=0; i< list.size();i++)
+							{
+								RouteLandmarks rd = (RouteLandmarks) list.get(i);
+								
+								 String existingRouteSentenseIds = rd.getSentenseIds();
+								 existingRouteSentenseIds += ","+routeSentenseIds;
+								 Query updateQuery = session.createQuery("update RouteLandmarks set sentenseIds = :ids where landmark = :landmarkName");
+								
+								 updateQuery.setParameter("landmarkName", currentLandmark);
+								 updateQuery.setParameter("ids", existingRouteSentenseIds);
+								 int result = updateQuery.executeUpdate();
+							}
+						 
+					 }
+					 else
+					 {
+						 //Insert
+						 
+						 	Session sessionInsert = HibernateUtil.getSessionFactory().openSession();
+							sessionInsert.beginTransaction();
+							RouteLandmarks routeLandmarks = new RouteLandmarks();
+						  
+							routeLandmarks.setLandmark(currentLandmark.trim());
+							routeLandmarks.setSentenseIds(String.valueOf(routeSentenseIds));
+		
+							sessionInsert.save(routeLandmarks);
+							sessionInsert.getTransaction().commit();
+					 }
+				 }
+		 }
+	 }
 	 
 
 }

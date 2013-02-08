@@ -29,10 +29,7 @@ import org.jsoup.select.NodeVisitor;
  */
 public class HtmlToPlainText 
 {
-//    public static void main(String... args) throws IOException {
-//        Validate.isTrue(args.length == 1, "usage: supply url to fetch");
-//        String url = args[0];
-	
+
 	HashMap<String,String> routesData = new HashMap<String, String>(); 
 
 	public HashMap<String, String> getPlainTextData(){
