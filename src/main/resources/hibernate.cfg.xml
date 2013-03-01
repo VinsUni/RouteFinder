@@ -10,5 +10,6 @@
     <mapping resource="com/tharun/hibernate/RouteDescriptions.hbm.xml"/>
     <mapping resource="com/tharun/hibernate/RouteLandmarks.hbm.xml"/>
     <mapping resource="com/tharun/hibernate/RouteSentenses.hbm.xml"/>
+    <mapping resource="com/tharun/hibernate/RouteLandmarksGraph.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

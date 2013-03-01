@@ -5,4 +5,5 @@
   <table-filter match-name="route_sentenses"/>
   <table-filter match-name="route_descriptions"/>
   <table-filter match-name="route_landmarks"/>
+  <table-filter match-name="route_landmarks_graph"/>
 </hibernate-reverse-engineering>

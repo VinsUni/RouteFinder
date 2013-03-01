@@ -47,25 +47,30 @@ public class Autotagging
 	public static String TAG_TYPE_DIRECTIONS = "directions";
 	public static Trie landmarksTree = null;
 	public static Trie directionsTree = null;
-	
+	public static boolean sentensesFinished = false; // This flag is used by writeLandmarksAdjacencyToDb to insert last paragraph.
+	public static String previousUrlId = "";  // 
+	public static ArrayList<String> adjacentLandmarks = new ArrayList<String>();
+	public static ArrayList<Integer> adjacentLandmarksSentenceIds = new ArrayList<Integer>(); 
 //	 Method is used to extract the landmarks from sentenses.
 	public static void extractLandMarks(List list)
 	{
-		for(int i=20; i< list.size();i++)
+		for(int i=0; i<list.size();i++)
 		{
+			if(i== list.size()-1)
+				sentensesFinished =true;
 			landmarksTree = new Trie();
 			directionsTree = new Trie();
 			RouteSentenses routeSentenses= (RouteSentenses) list.get(i);
 			loadLandMarks(routeSentenses.getRouteIdUrl().substring(routeSentenses.getRouteIdUrl().lastIndexOf("/")+1));
 			System.out.println(routeSentenses.getSentenses());
 			
-			stringTokeniser(routeSentenses.getSentenses(),routeSentenses.getSentenseId());
+			stringTokeniser(routeSentenses.getSentenses(),routeSentenses.getSentenseId(),routeSentenses.getRouteIdUrl());
 			System.out.println("__________________________________________________________________");
 			
 		}
 	}
 	
-	public static void namedEntityRecongition(String[] tokens, Integer routeSentenseId) throws FileNotFoundException
+	public static void namedEntityRecongition(String[] tokens, Integer routeSentenseId, String routeIdUrl) throws FileNotFoundException
 	{
 		InputStream modelIn = new FileInputStream(PATH+"en-ner-location.bin");
  		try {
@@ -83,7 +88,11 @@ public class Autotagging
 //					System.out.println(s);
 				}
 		 if(!entity.equals("") && entity != null)
-			 writeLandmarksToDb(entity.substring(1,entity.length()-1).split(","),routeSentenseId);
+		 {
+//			 writeLandmarksToDb(entity.substring(1,entity.length()-1).split(","),routeSentenseId);
+			 writeLandmarksAdjacencyToDb(entity.substring(1,entity.length()-1).split(","), routeSentenseId,routeIdUrl);
+		 
+		 }
 				
 						nameFinder.clearAdaptiveData();
 		}
@@ -133,7 +142,7 @@ public class Autotagging
 	}
 	
 	
-	private static void stringTokeniser(String sentence, Integer routeSentenseId)
+	private static void stringTokeniser(String sentence, Integer routeSentenseId, String routeIdUrl)
 	{
 		InputStream modelIn = null;
 		 TokenizerModel tModel = null;
@@ -146,8 +155,8 @@ public class Autotagging
 		    Tokenizer tokenizer = new TokenizerME(tModel);
 			
 			String tokens[] = tokenizer.tokenize(sentence);
-			namedEntityRecongition(tokens,routeSentenseId);
-			partsOfSpeechTagger(tokens,routeSentenseId);
+			namedEntityRecongition(tokens,routeSentenseId,routeIdUrl);
+			partsOfSpeechTagger(tokens,routeSentenseId,routeIdUrl);
 //			for(String s : tokens)
 //			{
 //				System.out.println(s);
@@ -167,7 +176,7 @@ public class Autotagging
 		}
 	}
 	
-	private static void partsOfSpeechTagger( String[] tokens, Integer routeSentenseId)
+	private static void partsOfSpeechTagger( String[] tokens, Integer routeSentenseId, String routeIdUrl)
 	{
 		InputStream modelIn = null;
 		ArrayList<String> nounsList = new ArrayList<String>();
@@ -197,7 +206,8 @@ public class Autotagging
 					 System.out.println(word);
 					
 					 String[] words = new String[] {word};
-					 writeLandmarksToDb(words,routeSentenseId);
+//					 writeLandmarksToDb(words,routeSentenseId);
+					 writeLandmarksAdjacencyToDb(words, routeSentenseId,routeIdUrl);
 					 word = "";
 				 }   
 				 else
@@ -210,7 +220,8 @@ public class Autotagging
 						   {
 							   System.out.println(word);
 							   String[] words = new String[] {word};
-								 writeLandmarksToDb(words,routeSentenseId);
+//								 writeLandmarksToDb(words,routeSentenseId);
+								 writeLandmarksAdjacencyToDb(words, routeSentenseId,routeIdUrl);
 							   word = "";
 						   }
 						   else
@@ -328,7 +339,7 @@ public class Autotagging
 				 {
 					 Session session = HibernateUtil.getSessionFactory().openSession();
 					 Query query = session.createQuery("from RouteLandmarks where landmark = :landmarkName ");
-					 query.setParameter("landmarkName", currentLandmark);
+					 query.setParameter("landmarkName", currentLandmark.trim());
 					 List list = query.list();
 					 if(list.size() > 0)
 					 {
@@ -366,5 +377,89 @@ public class Autotagging
 		 }
 	 }
 	 
+	 
+	 private static void writeLandmarksAdjacencyToDb(String[] landmarks, Integer routeSentenseIds, String routeIdUrl)
+	 {
+		 if(previousUrlId.equals(""))
+			 previousUrlId = routeIdUrl;
+		 
+		 if(!routeIdUrl.equals(previousUrlId) || sentensesFinished)
+		 {
+			 String landmarkNames[] = new String[adjacentLandmarks.size()];
+			 landmarkNames = adjacentLandmarks.toArray(landmarkNames);
+			 Integer senteseIds[] = new Integer[adjacentLandmarksSentenceIds.size()];
+			 senteseIds= adjacentLandmarksSentenceIds.toArray(senteseIds);
+			 
+			 
+			 WriteLandmarksAdjacencyToDb(landmarkNames,senteseIds);
+			 adjacentLandmarks = new ArrayList<String>();
+			 previousUrlId = "";
+			 
+		 }
+		 else
+		 {
+			 for(String landmark: landmarks)
+			 adjacentLandmarks.add(landmark);
+					 adjacentLandmarksSentenceIds.add(routeSentenseIds);
+		 }
+	 }
+		private static void WriteLandmarksAdjacencyToDb(String[] landmarks,Integer[] senteseIds)
+		{
+			 
+			 if(landmarks.length >0 && landmarks != null)
+			 {	 
+//					 for(String currentLandmark :landmarks)
+						 for(int i =0; i < landmarks.length; i++)
+					 {
+						 Session session = HibernateUtil.getSessionFactory().openSession();
+						 Query query = session.createQuery("from RouteLandmarksGraph where landmark = :landmarkName ");
+						 query.setParameter("landmarkName", landmarks[i].trim());
+						 List list = query.list();
+						 if(list.size() > 0)
+						 {
+							 // Update the particular record.
+							 
+							 for(int j=0; j< list.size();j++)
+								{
+								 RouteLandmarksGraph rd = (RouteLandmarksGraph) list.get(j);
+									
+									 String existingRouteSentenseIds = rd.getSentenseIds();
+									 existingRouteSentenseIds += ","+senteseIds[i];
+									 String existingAdjacencyLandmarks = rd.getAdjacencyLandmarks();
+									 if(i+1 < landmarks.length)
+									 existingAdjacencyLandmarks +=","+landmarks[i+1];
+									 
+									 Query updateQuery = session.createQuery("update RouteLandmarksGraph set sentenseIds = :ids,adjacencyLandmarks = :adjLandmarks  where landmark = :landmarkName");
+									
+									 updateQuery.setParameter("landmarkName",  landmarks[i]);
+									 updateQuery.setParameter("ids", existingRouteSentenseIds);
+									 updateQuery.setParameter("adjLandmarks", existingAdjacencyLandmarks);
+									 int result = updateQuery.executeUpdate();
+								}
+							 
+						 }
+						 else
+						 {
+							 //Insert
+							 
+							 	Session sessionInsert = HibernateUtil.getSessionFactory().openSession();
+								sessionInsert.beginTransaction();
+								RouteLandmarksGraph routeLandmarksGraph = new RouteLandmarksGraph();
+								String adjacencyLandmarks = "";
+								routeLandmarksGraph.setLandmark(landmarks[i].trim());
+								if(i+1<landmarks.length)
+									adjacencyLandmarks=landmarks[i+1].trim();
+								 
+								routeLandmarksGraph.setAdjacencyLandmarks(adjacencyLandmarks);
+								routeLandmarksGraph.setSentenseIds(String.valueOf(senteseIds[i]));
+			
+								sessionInsert.save(routeLandmarksGraph);
+								sessionInsert.getTransaction().commit();
+						 }
+					 }
+			 }
+		 }
+		 
+		 
 
 }

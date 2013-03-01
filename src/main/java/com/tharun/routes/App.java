@@ -31,10 +31,26 @@ public class App {
 			
 			//Step 4: Now find the landmarks
 			// Get Each sentense and then send it to the Autotagging functionality.
-		List sentensesList = getAllRouteSentenses();
-		Autotagging.extractLandMarks(sentensesList);
 	
+		List sentensesList = getAllRouteSentenses();
+		
+		Autotagging.extractLandMarks(sentensesList);
+//		insertIntoLandmarksAdjacencyList();
 	}
+	
+	private static void insertIntoLandmarksAdjacencyList()
+	{
+		Session sessionInsert = HibernateUtil.getSessionFactory().openSession();
+		sessionInsert.beginTransaction();
+		RouteLandmarksGraph routeLandmarksGraph = new RouteLandmarksGraph();
+	  
+		routeLandmarksGraph.setLandmark("hello");
+		routeLandmarksGraph.setAdjacencyLandmarks("hi tharun");
+		routeLandmarksGraph.setSentenseIds("1");
+		sessionInsert.save(routeLandmarksGraph);
+		sessionInsert.getTransaction().commit();
+	}
+	
 	private static void insertIntoSentensesTable(List list)
 	{
 		for(int i=0; i< list.size();i++)
