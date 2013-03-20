@@ -23,9 +23,10 @@ public class FindRoutes
 	{
 		Stack<String> result =findRoutes("Provo","Pleasant Grove"); 
 		
-		printRoutes(result);
+		System.out.println(printRoutes(result));
 		
 		/**
+		 * ("Cache County","Wellsville")
 		 * ("SR-147","US-89")
 		 * ("US-89","Pleasant Grove")
 		 * ("I-70","Vernal")
@@ -35,24 +36,26 @@ public class FindRoutes
 		 * ("Bacchus","Tooele")
 		 * ("Provo","Orem")
 		 * ("Provo","Pleasant Grove")
+		 *  ("Chester","Glenwood")
 		 */
-		while(!result.isEmpty())
-		{
-			System.out.println(result.pop());
-		}
+//		while(!result.isEmpty())
+//		{
+//			System.out.println(result.pop());
+//		}
 		
 		
 		
 	}
 	
-	public static void printRoutes(Stack<String> landmarks)
+	public static StringBuilder printRoutes(Stack<String> landmarks)
 	{
+		StringBuilder routeDescription = new StringBuilder();
 		while(!landmarks.isEmpty())
 		{
 			Session session = HibernateUtil.getSessionFactory().openSession();
 			String senteseIds = null;
 			String hql = "from RouteLandmarks R where R.landmark = "+"'"+landmarks.pop().trim()+"'";
-			System.out.println(hql);
+//			System.out.println(hql);
 			Query query = session.createQuery(hql);
 			List list = query.list();
 			 for(int i=0; i <list.size();i++)
@@ -72,14 +75,16 @@ public class FindRoutes
 					for(int i =0;i< listSentenses.size(); i++)
 					{
 						RouteSentenses routeSentenses = (RouteSentenses) listSentenses.get(i);
-						System.out.println(routeSentenses.getSentenses());
+						routeDescription.append(routeSentenses.getSentenses().replace("Route description", "").replace("[ edit", "").trim());
+//						System.out.println(routeSentenses.getSentenses().replace("Route description", "").replace("[ edit", "").trim());
 					}
 				 }
 			 }
 			 
-			 
+			 return routeDescription;
 			 
 		}
+		return routeDescription;
 	}
 	
 	
