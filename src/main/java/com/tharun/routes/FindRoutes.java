@@ -21,15 +21,24 @@ public class FindRoutes
 	
 	public static void main(String args[])
 	{
-		Stack<String> result =findRoutes("Provo","Pleasant Grove"); 
+		Stack<String> result =findRoutes("diamond interchange","Farmington"); 
 		
 		System.out.println(printRoutes(result));
 		
 		/**
 		 * ("Cache County","Wellsville")
+		 * ("diamond interchange","Centerville")
+		 * ("diamond interchange","Bountiful")
+		 * ("diamond interchange","East")
+		 * ("Navajo Bridge","Navajo Nation")
+		 * ("Navajo Bridge","Jacob Lake")
+		 * ("Navajo Bridge","Grand Canyon National Park")	
+		 * ("Cache County","Hyrum")
 		 * ("SR-147","US-89")
 		 * ("US-89","Pleasant Grove")
+		 * ("US-89","Glenwood")
 		 * ("I-70","Vernal")
+		 * ("I-70","Orem")
 		 * ("Chester","SR-120")
 		 * ("Chester","Glenwood")
 		 * ("Tooele","Glenwood")
@@ -37,6 +46,15 @@ public class FindRoutes
 		 * ("Provo","Orem")
 		 * ("Provo","Pleasant Grove")
 		 *  ("Chester","Glenwood")
+		 *  ("North Ogden","I-15")
+		 *  ("Kanesville",,"I-15")
+		 *	("Kanesville",,"SR-235")
+		 *	("Nebo Loop Scenic Byway", "Chester")
+		 *  ("SR-32", "Wyoming")
+		 *  ("I-84", "SR-226") 
+		 *  ("I-84", "SR-39")
+		 *  ("I-84", "Pineview Reservoir")
+		 *  ("I-84", "Huntsville")
 		 */
 //		while(!result.isEmpty())
 //		{

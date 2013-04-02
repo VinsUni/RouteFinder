@@ -23,8 +23,12 @@ public class Routes  extends ServerResource
 	      try
 	      {
 	          //get param from request
-	        System.out.println(  getQuery().getValues("user_email")+"\t REached Server");
-	        Stack<String> landmarks =FindRoutes.findRoutes("Chester","Glenwood"); 
+	    	  String from =  getQuery().getValues("from");
+	    	  String to = getQuery().getValues("to");
+	        System.out.println(  from+"\t REached Server");
+	        System.out.println(to);
+	        
+	        Stack<String> landmarks =FindRoutes.findRoutes(from.trim(),to.trim()); 
 	         routeDesc = FindRoutes.printRoutes(landmarks);
 	        
 	         //call DAO with parameter
